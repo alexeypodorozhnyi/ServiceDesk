@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="row justify-content-center">
+    <div class="col-md-4">
+        <form class="form-group"  action="{% url 'register_url' %}" method="post">
+            {% csrf_token %}
+            <label for="form.id_username">Username:</label>
+            <input type="text" id="form.id_username" class="form-control" name="{{ form.username.html_name}}"
+                   placeholder="User Name" required autofocus>
+            {{ form.as_p }}
+            <input type="submit" value="Sign Up">
+        </form>
+
+        <a href="{% url 'login_url' %}">Or login?</a>
+    </div>
+{% endblock %}
