@@ -1,6 +1,7 @@
 from django.utils.deprecation import MiddlewareMixin
 from django.http import HttpResponseRedirect
 import datetime
+from django.contrib.auth import logout
 
 class CheckUserLogin(MiddlewareMixin):
 
@@ -13,11 +14,12 @@ class CheckUserSession(MiddlewareMixin):
 
     def process_request(self, request):
         if not request.user.is_authenticated:
-          return
+            return
         if 'last_action' not in request.session.keys():
             request.session['last_action'] = datetime.datetime.now().isoformat()
         timediff = datetime.datetime.now() - datetime.datetime.fromisoformat(request.session.get('last_action'))
-        if timediff.total_seconds() > 2:
-            HttpResponseRedirect('authorisation/logout/')
-            del request.session['last_action']
+        print(timediff.total_seconds())
+        if timediff.total_seconds() > 300:
+            logout(request)
+            HttpResponseRedirect('authorisation/login/')
         request.session['last_action'] = datetime.datetime.now().isoformat()

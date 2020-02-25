@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'autorization.apps.AutorizationConfig',
     'helpdesc.apps.HelpdescConfig',
     'crispy_forms',
+    'rest_framework',
 ]
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 MIDDLEWARE = [

@@ -1,14 +1,12 @@
-import string
-
-from django.shortcuts import render
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy, reverse
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
+from django.views.generic import ListView, CreateView, UpdateView, DetailView
 from .models import Request, Comment, Event
 from .forms import RequestCreateForm, CommentCreateForm, StatusUpdateForm, ResolutionUpdateForm
-from django.contrib import messages
-from django.http import HttpResponseRedirect
 from django.utils import timezone
+from rest_framework.viewsets import ModelViewSet
+from .api.serializers import RequestSerializer
+from rest_framework.pagination import PageNumberPagination
 
 
 class RequestList(ListView, LoginRequiredMixin):
@@ -27,6 +25,7 @@ class RequestList(ListView, LoginRequiredMixin):
         if self.request.user.is_staff:
             return ['helpdesc/admin_panel.html']
         return ['helpdesc/index.html']
+
 
 class RequestCreate(LoginRequiredMixin, CreateView):
     model = Request
@@ -56,6 +55,13 @@ class RequestUpdate(LoginRequiredMixin, UpdateView):
             'status_update_form': StatusUpdateForm
         })
         return context
+
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        self.object.date_last_update = timezone.now()
+        self.object.save()
+        Event.create_event(self.object.user, self.object, '1', timezone.now())
+        return super().form_valid(form)
 
     def get_success_url(self):
         return reverse('request_detail_url', kwargs={'pk': self.object.pk})
@@ -132,3 +138,21 @@ class RequestDetail(LoginRequiredMixin, DetailView):
         })
         return context
 
+
+class StandardResultsSetPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
+
+class RequestViewSet(ModelViewSet):
+    queryset = Request.objects.all()
+    serializer_class = RequestSerializer
+    pagination_class = StandardResultsSetPagination
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        priority = str(self.request.query_params.get('priority')).lower()
+        if priority in ['1', '2' , '3']:
+            return qs.filter(priority=priority)
+        return qs
