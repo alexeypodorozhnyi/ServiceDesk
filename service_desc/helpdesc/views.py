@@ -1,32 +1,32 @@
+import string
+
 from django.shortcuts import render
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.urls import reverse_lazy, reverse
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
-from .models import Request, Comment
-from .forms import RequestCreateForm, CommentCreateForm, StatusUpdateForm
+from .models import Request, Comment, Event
+from .forms import RequestCreateForm, CommentCreateForm, StatusUpdateForm, ResolutionUpdateForm
 from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.utils import timezone
 
 
-class RequestList(ListView):
+class RequestList(ListView, LoginRequiredMixin):
     model = Request
-    template_name = 'helpdesc/index.html'
     paginate_by = 100
+    ordering = ['-date_last_update']
 
     def get_queryset(self):
         queryset = super().get_queryset()
         if self.request.user.is_authenticated:
             if not self.request.user.is_staff:
-                queryset = queryset.filter(user=self.request.user)
+                queryset = queryset.filter(user=self.request.user).filter(flag_delete=False)
         return queryset
 
-    def get_context_data(self, *, object_list=None, **kwargs):
-        context = super().get_context_data(object_list=object_list, **kwargs)
-        context.update({
-            'request_create_form': RequestCreateForm
-        })
-        return context
-
+    def get_template_names(self):
+        if self.request.user.is_staff:
+            return ['helpdesc/admin_panel.html']
+        return ['helpdesc/index.html']
 
 class RequestCreate(LoginRequiredMixin, CreateView):
     model = Request
@@ -38,17 +38,17 @@ class RequestCreate(LoginRequiredMixin, CreateView):
         self.object = form.save(commit=False)
         self.object.user = self.request.user
         self.object.save()
+        Event.create_event(self.object.user, self.object, '1', timezone.now())
         return super().form_valid(form)
 
 
 class RequestUpdate(LoginRequiredMixin, UpdateView):
     model = Request
-    success_url = '/'
     form_class = RequestCreateForm
     template_name = 'helpdesc/request_update.html'
 
-    def get_context_data(self, *, object_list=None, **kwargs):
-        context = super().get_context_data(object_list=object_list, **kwargs)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
         comments = self.object.comment_set.all()
         context.update({
             'comments': comments,
@@ -57,29 +57,78 @@ class RequestUpdate(LoginRequiredMixin, UpdateView):
         })
         return context
 
+    def get_success_url(self):
+        return reverse('request_detail_url', kwargs={'pk': self.object.pk})
+
 
 class CommentCreate(LoginRequiredMixin, CreateView):
     model = Comment
     http_method_names = ['post']
-    success_url = '/'
     form_class = CommentCreateForm
-    template_name = 'helpdesc/comment_create.html'
 
     def form_valid(self, form):
         self.object = form.save(commit=False)
         self.object.user = self.request.user
         self.object.request = Request.objects.get(pk=self.request.POST.get("request"))
-        self.object.save()
+        Event.create_event(self.object.user, self.object.request, '3', timezone.now())
         return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse('request_detail_url', kwargs={'pk': self.object.request.pk})
 
 
 class StatusUpdate(LoginRequiredMixin, UpdateView):
     model = Request
+    http_method_names = ['post']
     success_url = '/'
     form_class = StatusUpdateForm
 
     def form_valid(self, form):
         self.object = form.save(commit=False)
         self.object.date_last_update = timezone.now()
+        self.object.status = self.request.POST.get("status_resolution", "1")
+        if self.object.status == "4":
+            self.object.flag_reopen = True
         self.object.save()
         return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse('request_detail_url', kwargs={'pk': self.object.pk})
+
+
+class ResolutionUpdate(LoginRequiredMixin, UpdateView):
+    model = Request
+    http_method_names = ['post']
+    success_url = '/'
+    form_class = ResolutionUpdateForm
+
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        self.object.date_last_update = timezone.now()
+        self.object.status = "3"
+        self.object.resolution = self.request.POST.get("request_resolution")
+        if self.object.flag_reopen and self.object.resolution == "2":
+            self.object.flag_delete = True
+        self.object.save()
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse('request_detail_url', kwargs={'pk': self.object.pk})
+
+
+class RequestDetail(LoginRequiredMixin, DetailView):
+    model = Request
+    success_url = '/'
+    template_name = 'helpdesc/request_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        comments = self.object.comment_set.all()
+        context.update({
+            'comments': comments,
+            'comment_create_form': CommentCreateForm,
+            'status_update_form': StatusUpdateForm,
+            'resolution_update_form': ResolutionUpdateForm
+        })
+        return context
+

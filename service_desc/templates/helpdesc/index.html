@@ -2,62 +2,52 @@
 
 {% block content  %}
 <div class="row">
-     <div class="col-lg-3">
-        <h5>Restored</h5>
+    <div class="col-lg-3 ml-5 mt-3">
+        <h5>New</h5>
         {% for request in object_list %}
-        <div class="card" style="width: 18rem;">
+        {% if request.status == "1" or request.status == "4" %}
+
+        <div class="card bg-light mb-3" style="width: 18rem;">
             <div class="card-body">
                 <h5 class="card-title">{{ request.name }}</h5>
                 <h6 class="card-subtitle mb-2 text-muted">{{ request.user.username }}</h6>
-                <p class="card-text">{{ request.info }}</p>
-                <a class="request" href="{% url 'request_update_url' request.pk %}">Another link</a>
+                <p class="card-text">{{ request.info|truncatewords:10 }}</p>
+                <a class="request" href="{% url 'request_detail_url' request.pk %}">Detail</a>
             </div>
         </div>
-         {% endfor %}
-         <a href="{% url 'request_create_url' %}">
-         <img alt="Create request" src="https://cdn.onlinewebfonts.com/svg/img_356964.png"
-         width=150" height="70">
-      </a>
+
+        {% endif %}
+        {% endfor %}
     </div>
-    <div class="col-lg-3">
-        <h5>New</h5>
-        <div class="card" style="width: 18rem;height: 10rem">
-            <div class="card-body">
-                <h5 class="card-title">Card title</h5>
-                <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6>
-                <p class="card-text"></p>
-                <a href="#" class="card-link">Card link</a>
-                <a href="#" class="card-link">Another link</a>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-3">
+    <div class="col-lg-3 ml-5 mt-3">
         <h5>In Progress</h5>
-        <div class="card" style="width: 18rem;">
+        {% for request in object_list %}
+        {% if request.status == "2" %}
+        <div class="card bg-light mb-3" style="width: 18rem;">
             <div class="card-body">
-                <h5 class="card-title">Card title</h5>
-                <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6>
-                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the
-                    card's content.</p>
-                <a href="#" class="card-link">Card link</a>
-                <a href="#" class="card-link">Another link</a>
+                <h5 class="card-title">{{ request.name }}</h5>
+                <h6 class="card-subtitle mb-2 text-muted">{{ request.user.username }}</h6>
+                <p class="card-text">{{ request.info|truncatewords:10 }}</p>
+                <a class="request" href="{% url 'request_detail_url' request.pk %}">Detail</a>
             </div>
         </div>
+        {% endif %}
+        {% endfor %}
     </div>
-    <div class="col-lg-3">
-        <h5>Resolved</h5>
-        <div class="card" style="width: 18rem;">
+    <div class="col-lg-3 ml-5 mt-3">
+        <h5>Done</h5>
+        {% for request in object_list %}
+        {% if request.status == "3" %}
+        <div class="card bg-light mb-3" style="width: 18rem;">
             <div class="card-body">
-                <h5 class="card-title">Card title</h5>
-                <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6>
-                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the
-                    card's content.</p>
-                <a href="#" class="card-link">Card link</a>
-                <a href="#" class="card-link">Another link</a>
+                <h5 class="card-title">{{ request.name }}</h5>
+                <h6 class="card-subtitle mb-2 text-muted">{{ request.user.username }}</h6>
+                <p class="card-text">{{ request.info|truncatewords:10 }}</p>
+                <a class="request" href="{% url 'request_detail_url' request.pk %}">Detail</a>
             </div>
         </div>
+        {% endif %}
+        {% endfor %}
     </div>
-</div>
-<div class="modal hide" id="contactModal">
 </div>
 {% endblock %}

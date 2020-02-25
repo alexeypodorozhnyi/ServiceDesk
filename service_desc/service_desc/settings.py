@@ -39,9 +39,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'autorization.apps.AutorizationConfig',
     'helpdesc.apps.HelpdescConfig',
-    'bootstrap_modal_forms',
+    'crispy_forms',
 ]
-
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -50,10 +50,12 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'helpdesc.middleware.CheckUserLogin',
+    'helpdesc.middleware.CheckUserSession',
 ]
 
 ROOT_URLCONF = 'service_desc.urls'
-
+#SESSION_COOKIE_AGE = 5
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',

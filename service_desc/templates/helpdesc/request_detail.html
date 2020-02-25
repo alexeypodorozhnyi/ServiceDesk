@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block content  %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-8">
+        <div class="jumbotron jumbotron-fluid">
+            <div class="container">
+                <h1 class="display-4">{{object.name}}</h1>
+                <hr class="my-4">
+                <div class="row mt-5">
+                    <div class="col">
+                        <h5>Priority: {{object.get_priority_display}}</h5>
+                        <h5>Status: {{object.get_status_display}}</h5>
+                        {% if object.resolution %}
+                        <div class="row mt-2">
+                            <div class="col order-12">
+                                <h5>Resolution: {{object.get_resolution_display}}</h5>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                        {% if user.is_staff %}
+                        <div class="row mt-5">
+                            {% if object.status == "1" %}
+                            <form method="post" action="{% url 'status_update_url' object.pk %}">
+                                {% csrf_token %}
+                                {{ status_update_form|crispy }}
+                                <input type="hidden" name="status_resolution" value="2">
+                                <button type="submit" class="btn btn-success">Start Progress</button>
+                            </form>
+                            {% endif %}
+                             {% if object.status == "1" or object.status == "2"  %}
+                            <form method="post" action="{% url 'resolution_update_url' object.pk %}">
+                                {% csrf_token %}
+                                {{ resolution_update_form|crispy }}
+                                <input type="hidden" name="request_resolution"
+                                       value="1">
+                                <button type="submit" class="btn btn-success">Resolve</button>
+                            </form>
+                            <form method="post" action="{% url 'resolution_update_url' object.pk %}">
+                                {% csrf_token %}
+                                {{ resolution_update_form|crispy }}
+                                <input type="hidden" name="request_resolution"
+                                       value="2">
+                                <button type="submit" class="btn btn-success">Reject</button>
+                            </form>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    {% if not user.is_staff %}
+                    {% if object.status == "3" and object.resolution == "2" %}
+                    <form method="post" action="{% url 'status_update_url' object.pk %}">
+                        {% csrf_token %}
+                        {{ status_update_form|crispy }}
+                        <input type="hidden" name="status_resolution" value="4">
+                        <button type="submit" class="btn btn-success">Reopen</button>
+                    </form>
+                    {% endif %}
+                    {% endif %}
+                </div>
+                <div class="container content-row">
+                    <div class="row mt-5">
+                        <div class="col ml-0">
+                            <div class="card h-200">
+                                <div class="card-body">
+                                    <p>{{object.info}}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-5">
+                     <div class="col ml-5">
+                    <p>{{object.date_create|date:"D, d M, Y"}}</p>
+                     </div>
+                </div>
+                <div class="row">
+                    <div class="col ml-5">
+                        <p>{{object.date_last_update|date:"D, d M, Y"}}</p>
+                    </div>
+                </div>
+                {% if not user.is_staff %}
+                <div class="row mt-5">
+                    <a class="btn btn-success" href="{% url 'request_update_url' object.pk %}" role="button">Update</a>
+                </div>
+                {% endif %}
+                <div class="row mt-5"></div>
+                {% for comment in comments %}
+                <div class="card mt-2">
+                    <div class="card-body">
+                        <div class="title h5">
+                            <a href="#"><b>{{ comment.user }}</b></a>
+                            added a comment.
+                            <h6 class="text-muted time">{{comment.date_comment|date:"D, d M, Y"}}</h6>
+                        </div>
+                        <p>{{ comment.text }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+                {%if object.status == "2" %}
+                <form action="{% url 'comment_create_url' %}" method="post">
+                    {% csrf_token %}
+                    {{ comment_create_form|crispy }}
+                    <input type="hidden" value="{{ object.pk }}" name="request">
+                    <button type="submit" class="btn btn-success">Send</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

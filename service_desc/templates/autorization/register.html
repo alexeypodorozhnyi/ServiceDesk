@@ -7,9 +7,23 @@
             {% csrf_token %}
             <label for="form.id_username">Username:</label>
             <input type="text" id="form.id_username" class="form-control" name="{{ form.username.html_name}}"
-                   placeholder="User Name" required autofocus>
-            {{ form.as_p }}
-            <input type="submit" value="Sign Up">
+                   placeholder="User Name:" required autofocus>
+            <label for="form.id_username">First name:</label>
+            <input type="text" id="form.id_first_name" class="form-control" name="{{ form.first_name.html_name}}"
+                   placeholder="First name:" optional autofocus>
+            <label for="form.id_username">Last name:</label>
+            <input type="text" id="form.id_last_name" class="form-control" name="{{ form.last_name.html_name}}"
+                   placeholder="Last name:" optional autofocus>
+            <label for="form.id_username">Email:</label>
+            <input type="email" id="form.id_email" class="form-control" name="{{ form.email.html_name}}"
+                   placeholder="Email:" optional autofocus>
+            <label for="form.id_username">Password:</label>
+            <input type="password" id="form.id_password1" class="form-control" name="{{ form.password1.html_name}}"
+                   placeholder="Password:" optional autofocus>
+            <label for="form.id_username">Password confirmation:</label>
+            <input type="password" id="form.id_password2" class="form-control" name="{{ form.password2.html_name}}"
+                   placeholder="Password confirmation:" optional autofocus>
+            <button class="btn btn-lg btn-primary btn-block" type="submit">Sign Up</button>
         </form>
 
         <a href="{% url 'login_url' %}">Or login?</a>

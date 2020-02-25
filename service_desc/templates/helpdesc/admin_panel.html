@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content  %}
+<div class="row">
+    <div class="col-lg-8 ml-5 mt-3">
+        {% for request in object_list %}
+        <div class="card">
+            <div class="card-header">
+                {{request.name}}
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <h3>{{request.user.first_name}} {{request.user.last_name}}</h3>
+                            {% if request.status == "3" %}
+                            <button type="button" class="btn btn-success ml-auto">{{request.get_status_display}}
+                            </button>
+                            {% else %}
+                            <button type="button" class="btn btn-warning ml-auto">{{request.get_status_display}}
+                            </button>
+                            {% endif %}
+                </div>
+                <p>{{request.date_create|date:"D, d M, Y"}}</p>
+                <p class="card-text">{{request.info|truncatewords:30}}</p>
+                <a class="btn btn-primary" href="{% url 'request_detail_url' request.pk %}">Detail</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}

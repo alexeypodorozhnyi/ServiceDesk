@@ -18,12 +18,16 @@ class Request(models.Model):
         ('1', 'New'),
         ('2', 'In Progress'),
         ('3', 'Done'),
-        ('4', 'Rejected'),
-        ('5', 'Restored'),
-        ('6', 'Rejected again')
+        ('4', 'Restored')
     ]
     status = models.CharField(choices=STATUS_CHOICES,max_length=2,default='1')
+    RESOLUTION_CHOICES = [
+        ('1', 'Resolved'),
+        ('2', 'Rejected')
+    ]
+    resolution = models.CharField(choices=RESOLUTION_CHOICES,max_length=2,null=True,blank=True)
     flag_delete = models.BooleanField(default=False)
+    flag_reopen = models.BooleanField(default=False)
 
 
 class Comment(models.Model):
@@ -33,18 +37,24 @@ class Comment(models.Model):
     date_comment = models.DateTimeField(auto_now_add=True)
 
 
-class StatusHistory(models.Model):
-    request = models.ForeignKey(Request,on_delete=models.CASCADE, db_index=True)
-    STATUS_CHOICES = [
-        ('1', 'New'),
-        ('2', 'In Progress'),
-        ('3', 'Done'),
-        ('4', 'Rejected'),
-        ('5', 'Restored'),
-        ('6', 'Rejected again')
+class Event(models.Model):
+    user = models.ForeignKey(User,on_delete=models.CASCADE)
+    request = models.ForeignKey(Request, on_delete=models.DO_NOTHING,related_name='request_name')
+    EVENT_CHOICES = [
+        ('1', 'Create Request'),
+        ('2', 'Update Request'),
+        ('3', 'Create Comment'),
+        ('4', 'Update Comment'),
+        ('5', 'Update Status')
     ]
-    status = models.CharField(choices=STATUS_CHOICES, max_length=2, default='1')
-    date_from = models.DateTimeField(auto_now_add=True)
+    event = models.CharField(choices=EVENT_CHOICES, max_length=2, default='1')
+    event_date_time = models.DateTimeField(auto_now_add=True)
+
+    def create_event(user,request,event,event_date_time):
+        event = Event.objects.create(user=user, request=request, event=event,event_date_time=event_date_time)
+        event.save()
+
+
 
 
 

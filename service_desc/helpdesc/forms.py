@@ -18,3 +18,10 @@ class StatusUpdateForm(ModelForm):
     class Meta:
         model = Request
         fields = ('status',)
+        widgets = {'status': HiddenInput()}
+
+class ResolutionUpdateForm(ModelForm):
+    class Meta:
+        model = Request
+        fields = ('resolution',)
+        widgets = {'resolution': HiddenInput()}
