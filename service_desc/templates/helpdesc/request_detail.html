@@ -20,7 +20,7 @@
                         {% endif %}
                     </div>
                         {% if user.is_staff %}
-                        <div class="row mt-5">
+                        <div class="row mt-2 ml-auto">
                             {% if object.status == "1" %}
                             <form method="post" action="{% url 'status_update_url' object.pk %}">
                                 {% csrf_token %}

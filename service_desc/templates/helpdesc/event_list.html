@@ -1,0 +1,14 @@
+{% block content  %}
+<div class="card" style="width: 18rem;">
+    <div class="card-header">
+        Events
+    </div>
+    <ul class="list-group list-group-flush">
+        {% for event in object_list %}
+        <li class="list-group-item">
+            <p>{{event.user.username}} {{event.get_event_display}} {{event.request.name}} at {{event.event_date_time}}</p>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

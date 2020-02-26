@@ -1,6 +1,7 @@
 from django.urls import path,include
 
-from .views import RequestCreate,RequestList,RequestUpdate,CommentCreate,StatusUpdate,RequestDetail,ResolutionUpdate
+from .views import RequestCreate,RequestList,RequestUpdate,CommentCreate,StatusUpdate,RequestDetail,ResolutionUpdate,\
+    EventList
 from rest_framework.routers import DefaultRouter
 from .views import RequestViewSet
 
@@ -16,5 +17,8 @@ urlpatterns = [
     path('comment_create/',  CommentCreate.as_view(), name='comment_create_url'),
     path('status_update/<int:pk>/',StatusUpdate.as_view(),name='status_update_url'),
     path('resolution_update/<int:pk>/',ResolutionUpdate.as_view(),name='resolution_update_url'),
+    path('resolution_update/<int:pk>/',ResolutionUpdate.as_view(),name='resolution_update_url'),
+    path('event_list/',EventList.as_view(),name='event_list_url'),
     path('', include(router.urls)),
+
 ]

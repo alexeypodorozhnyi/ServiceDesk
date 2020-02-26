@@ -3,6 +3,24 @@
 {% block content  %}
 <div class="row">
     <div class="col-lg-8 ml-5 mt-3 ">
+        <nav class="nav nav-pills flex-column flex-sm-row">
+            <form method="get">
+                <input type="hidden" name="status_resolution" value="4">
+                <button type="submit" class="flex-sm-fill text-sm-center nav-link active">Restored</button>
+            </form>
+            <form method="get">
+                <input type="hidden" name="status_resolution" value="1">
+                <button type="submit" class="flex-sm-fill text-sm-center nav-link active">New</button>
+            </form>
+            <form method="get">
+                <input type="hidden" name="status_resolution" value="2">
+                <button type="submit" class="flex-sm-fill text-sm-center nav-link active">In Progress</button>
+            </form>
+            <form method="get">
+                <input type="hidden" name="status_resolution" value="3">
+                <button type="submit" class="flex-sm-fill text-sm-center nav-link active">Done</button>
+            </form>
+        </nav>
         {% for request in object_list %}
         <div class="card mt-1">
             <div class="card-header">
@@ -24,7 +42,7 @@
                 <a class="btn btn-primary" href="{% url 'request_detail_url' request.pk %}">Detail</a>
             </div>
         </div>
-    {% endfor %}
+        {% endfor %}
     </div>
 </div>
 

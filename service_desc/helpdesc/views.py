@@ -12,12 +12,16 @@ from rest_framework.pagination import PageNumberPagination
 class RequestList(ListView, LoginRequiredMixin):
     model = Request
     paginate_by = 100
-    ordering = ['-date_last_update']
+    ordering = ['-priority', '-date_last_update']
 
     def get_queryset(self):
         queryset = super().get_queryset()
+        status = str(self.request.GET.get('status_resolution')).lower()
         if self.request.user.is_authenticated:
-            if not self.request.user.is_staff:
+            if self.request.user.is_staff:
+                if status in ['1', '2', '3', '4']:
+                    queryset = queryset.filter(status=status)
+            else:
                 queryset = queryset.filter(user=self.request.user).filter(flag_delete=False)
         return queryset
 
@@ -139,6 +143,13 @@ class RequestDetail(LoginRequiredMixin, DetailView):
         return context
 
 
+class EventList(LoginRequiredMixin, ListView):
+    model = Event
+    paginate_by = 10
+    success_url = '/'
+    template_name = 'helpdesc/event_list.html'
+
+
 class StandardResultsSetPagination(PageNumberPagination):
     page_size = 10
     page_size_query_param = 'page_size'
@@ -153,6 +164,6 @@ class RequestViewSet(ModelViewSet):
     def get_queryset(self):
         qs = super().get_queryset()
         priority = str(self.request.query_params.get('priority')).lower()
-        if priority in ['1', '2' , '3']:
+        if priority in ['1', '2', '3']:
             return qs.filter(priority=priority)
         return qs
